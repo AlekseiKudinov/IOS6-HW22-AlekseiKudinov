@@ -1,27 +1,50 @@
 import Foundation
 
 public class Storage {
-    private var storage = [Chip]()
-    private let queue = DispatchQueue(label: "Storage Queue", qos: .utility, attributes: .concurrent)
-    public var chipsCount: Int {
-        return storage.count
+    public var storage: [Chip] = []
+    public var id: Int = 0
+    private let condition = NSCondition()
+    public var isAvailable = false
+    public var isStorageEmpty: Bool {
+        return storage.isEmpty
     }
-    public var isStorageEmpty = true
 
     public init() {}
 
-    func addChipToStorage(chip: Chip, completion: @escaping () -> ()) {
-        queue.async(flags: .barrier) {
-            self.storage.append(chip)
-            completion()
-        }
+    func addChipToStorage(item: Chip) {
+        condition.lock()
+        storage.append(item)
+        id += 1
+        print("Chip is created - \(Date.getCurrentTime())")
+        print("Chips in storage — \(storage.count) - \(Date.getCurrentTime())\n")
+        isAvailable = true
+        condition.signal()
+        condition.unlock()
     }
 
-    func getChipFromStorage(completion: @escaping (_ lastChip: Chip) -> ()) {
-        queue.sync {
-            if let lastChip = self.storage.popLast() {
-                completion(lastChip)
-            }
+    func getChipFromStorage() -> Chip {
+        while (!isAvailable) {
+            condition.wait()
         }
+        let lastChip = storage.removeLast()
+        condition.signal()
+        condition.unlock()
+        if isStorageEmpty {
+            isAvailable = false
+        }
+        return lastChip
     }
 }
+
+extension Date {
+    public static func getCurrentTime() -> String {
+        let date = Date()
+        let dateFormatter = DateFormatter()
+
+        dateFormatter.dateFormat = "HH:mm:ss"
+
+        let currentTime = dateFormatter.string(from: date)
+        return currentTime
+    }
+}
+
