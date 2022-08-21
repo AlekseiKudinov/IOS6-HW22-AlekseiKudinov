@@ -16,10 +16,9 @@ public class Storage {
         storage.append(item)
         id += 1
         print("Chip is created - \(Date.getCurrentTime())")
-        print("Chips in storage — \(storage.count) - \(Date.getCurrentTime())\n")
-        isAvailable = true
         condition.signal()
         condition.unlock()
+        isAvailable = true
     }
 
     func getChipFromStorage() -> Chip {
@@ -27,6 +26,7 @@ public class Storage {
             condition.wait()
         }
         let lastChip = storage.removeLast()
+//        print("Chip was soldered - \(Date.getCurrentTime())")
         condition.signal()
         condition.unlock()
         if isStorageEmpty {
@@ -41,7 +41,7 @@ extension Date {
         let date = Date()
         let dateFormatter = DateFormatter()
 
-        dateFormatter.dateFormat = "HH:mm:ss"
+        dateFormatter.dateFormat = "HH:mm:ss:SSSS"
 
         let currentTime = dateFormatter.string(from: date)
         return currentTime

@@ -10,9 +10,8 @@ public class WorkingThread: Thread {
     public override func main() {
         repeat {
             let chipForSoldering = storage.getChipFromStorage()
-            chipForSoldering.sodering()
             print("Chip was soldered - \(Date.getCurrentTime())")
-            print("Chips in storage — \(storage.storage.count) - \(Date.getCurrentTime())\n")
+            chipForSoldering.sodering()
         } while storage.isAvailable || storage.isStorageEmpty
     }
 }
